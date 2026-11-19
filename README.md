@@ -142,9 +142,14 @@ check_duplicate_file/
 ├── templates/, static/ # giao diện web
 ├── data/folders/       # KHO FILE CŨ (mỗi thư mục = 1 thư mục thật ở đây)
 ├── data/cache/         # chỉ mục SĐT (tự tạo lại được, xoá cũng không sao)
-├── uploads/            # file mới tạm thời (tự dọn sau 12h)
-└── exports/            # file đã xuất
+├── uploads/            # FILE TẠM: file mới vừa upload để kiểm tra
+└── exports/            # FILE TẠM: file vừa xuất ra
 ```
+
+**File tạm (`uploads/`, `exports/`)**: giữ lại trong lúc làm việc để còn xuất file / lưu vào
+thư mục sau khi kiểm tra. Chúng **tự xoá sạch mỗi lần khởi động lại tool**, và tự dọn sau 12 giờ
+không dùng. Muốn dọn ngay: tab *Thư mục lưu trữ* → mục **File tạm** → **🧹 Dọn ngay**.
+Xoá tay cũng được, không ảnh hưởng gì.
 
 Muốn sao lưu toàn bộ kho dữ liệu: copy thư mục `data/folders/`.
 Chỉ mục được cache theo ngày sửa + dung lượng file, nên lần check sau rất nhanh;

@@ -26,18 +26,45 @@ SESSION_TTL = 12 * 3600
 
 # ------------------------------------------------------------------ tiện ích
 
-def _cleanup():
+def _dir_size(path):
+    total = 0
+    for root, _, files in os.walk(path):
+        for fn in files:
+            try:
+                total += os.path.getsize(os.path.join(root, fn))
+            except OSError:
+                pass
+    return total
+
+
+def _cleanup(drop_all=False):
+    """Dọn file tạm trong uploads/ và exports/.
+
+    drop_all=True (lúc khởi động hoặc bấm nút dọn): xoá hết, không cần chờ hết hạn.
+    Phiên kiểm tra nằm trong RAM nên sau khi restart, file tạm cũ là vô dụng.
+    """
     now = time.time()
+    freed = 0
+
     for token in list(CHECKS):
-        if now - CHECKS[token]['created'] > SESSION_TTL:
-            shutil.rmtree(os.path.join(storage.UPLOAD_DIR, token), ignore_errors=True)
+        if drop_all or now - CHECKS[token]['created'] > SESSION_TTL:
             CHECKS.pop(token, None)
-    if os.path.isdir(storage.UPLOAD_DIR):
-        for name in os.listdir(storage.UPLOAD_DIR):
-            path = os.path.join(storage.UPLOAD_DIR, name)
-            if os.path.isdir(path) and name not in CHECKS \
-                    and now - os.path.getmtime(path) > SESSION_TTL:
+
+    for base in (storage.UPLOAD_DIR, storage.EXPORT_DIR):
+        if not os.path.isdir(base):
+            continue
+        for name in os.listdir(base):
+            path = os.path.join(base, name)
+            if not os.path.isdir(path) or name in CHECKS:
+                continue
+            try:
+                expired = now - os.path.getmtime(path) > SESSION_TTL
+            except OSError:
+                expired = True
+            if drop_all or expired:
+                freed += _dir_size(path)
                 shutil.rmtree(path, ignore_errors=True)
+    return freed
 
 
 def _fail(msg, code=400):
@@ -157,6 +184,22 @@ def api_reindex(folder):
 
 
 # ------------------------------------------------------------------ API check
+
+@app.get('/api/temp-usage')
+def api_temp_usage():
+    size = _dir_size(storage.UPLOAD_DIR) + _dir_size(storage.EXPORT_DIR)
+    sessions = sum(1 for base in (storage.UPLOAD_DIR, storage.EXPORT_DIR)
+                   if os.path.isdir(base)
+                   for name in os.listdir(base)
+                   if os.path.isdir(os.path.join(base, name)))
+    return jsonify({'ok': True, 'size': size, 'items': sessions, 'active': len(CHECKS)})
+
+
+@app.post('/api/cleanup')
+def api_cleanup():
+    freed = _cleanup(drop_all=True)
+    return jsonify({'ok': True, 'freed': freed})
+
 
 @app.post('/api/check')
 def api_check():
@@ -300,6 +343,9 @@ def handle_413(exc):
 
 
 if __name__ == '__main__':
+    _freed = _cleanup(drop_all=True)
+    if _freed:
+        print(f'>> Đã dọn {_freed / 1048576:.1f} MB file tạm của phiên trước')
     port = int(os.environ.get('PORT', 8686))
     print(f'>> Mở trình duyệt: http://127.0.0.1:{port}')
     app.run(host=os.environ.get('HOST', '127.0.0.1'), port=port, threaded=True, debug=False)

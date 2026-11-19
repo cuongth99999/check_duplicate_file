@@ -321,6 +321,7 @@ $('#btn-check').addEventListener('click', async () => {
     const t0 = performance.now();
     const data = await api('/api/check', { method: 'POST', body: fd });
     LAST = data;
+    refreshTempUsage();
     $('#btn-reset').style.display = '';
     $('#check-status').textContent =
       `Xong trong ${((performance.now() - t0) / 1000).toFixed(1)}s · chỉ mục ${fmt(data.index_size)} SĐT`;
@@ -548,5 +549,28 @@ function bindCard(f, data) {
   });
 }
 
+/* ------------------------------------------------------------------ file tạm */
+async function refreshTempUsage() {
+  try {
+    const r = await api('/api/temp-usage');
+    $('#temp-usage').innerHTML = r.items
+      ? `Đang chiếm <b>${mb(r.size)}</b> · ${fmt(r.items)} thư mục tạm · ${fmt(r.active)} phiên còn dùng được`
+      : 'Không có file tạm nào.';
+  } catch (e) { $('#temp-usage').textContent = ''; }
+}
+$('#btn-cleanup').addEventListener('click', async () => {
+  if (!await askConfirm('Dọn hết file tạm?',
+        'Xoá file đã upload và file đã xuất đang giữ tạm.<br>'
+        + '<b>Không ảnh hưởng</b> dữ liệu trong các thư mục lưu trữ.<br>'
+        + 'Lưu ý: các link tải file đã xuất ở màn hình kết quả sẽ không còn dùng được.',
+        false, 'Dọn')) return;
+  try {
+    const r = await api('/api/cleanup', { method: 'POST' });
+    toast(`Đã dọn ${mb(r.freed)} file tạm`);
+    refreshTempUsage();
+  } catch (e) { toast(e.message, true); }
+});
+
 MODAL.init();
+refreshTempUsage();
 loadFolders().catch(e => toast(e.message, true));
