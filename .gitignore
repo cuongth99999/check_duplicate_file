@@ -1,0 +1,40 @@
+# ──────────────────────────────────────────────────────────────
+#  DỮ LIỆU KHÁCH HÀNG — TUYỆT ĐỐI KHÔNG ĐẨY LÊN GIT
+# ──────────────────────────────────────────────────────────────
+data/folders/*
+data/cache/*
+uploads/*
+exports/*
+!data/folders/.gitkeep
+!data/cache/.gitkeep
+!uploads/.gitkeep
+!exports/.gitkeep
+
+# Mọi file Excel/CSV rời (chặn lỡ tay commit file dữ liệu)
+*.xlsx
+*.xlsm
+*.xls
+*.csv
+
+# ──────────────────────────────────────────────────────────────
+#  Môi trường Python
+# ──────────────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# ──────────────────────────────────────────────────────────────
+#  Hệ điều hành / editor / log
+# ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.log
+nohup.out
+.env

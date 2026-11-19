@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check trùng số điện thoại</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">☎</span>
+    <div>
+      <h1>Check trùng số điện thoại</h1>
+      <p>Lưu file cũ theo thư mục · upload file mới · đối chiếu nhiều thư mục cùng lúc</p>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="check">Kiểm tra trùng</button>
+    <button class="tab" data-tab="folders">Thư mục lưu trữ</button>
+  </nav>
+</header>
+
+<main>
+<!-- ============================== TAB KIỂM TRA ============================== -->
+<section id="tab-check" class="tab-panel active">
+  <div class="card">
+    <div class="card-head">
+      <h2>1. Chọn thư mục đối chiếu</h2>
+      <div class="head-actions">
+        <button class="btn-link" id="pick-all">Chọn tất cả</button>
+        <button class="btn-link" id="pick-none">Bỏ chọn</button>
+        <button class="btn-link" id="reload-folders"
+                title="Đọc lại danh sách thư mục và số SĐT đã lập chỉ mục (dùng khi vừa thêm/xoá file ở tab Thư mục lưu trữ)">↻ Tải lại danh sách</button>
+      </div>
+    </div>
+    <div id="folder-picker" class="folder-picker"><p class="muted">Đang tải…</p></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>2. Upload file mới cần kiểm tra</h2></div>
+    <div id="dropzone" class="dropzone">
+      <input type="file" id="new-files" multiple accept=".xlsx,.xlsm">
+      <div class="dz-inner">
+        <strong>Kéo thả file Excel vào đây</strong>
+        <span>hoặc bấm để chọn file (.xlsx, .xlsm) — chọn được nhiều file</span>
+      </div>
+    </div>
+    <div id="new-file-bar" class="file-bar" style="display:none">
+      <span class="muted" id="new-file-count"></span>
+      <button class="btn-link" id="clear-files">Xoá hết file đã chọn</button>
+    </div>
+    <ul id="new-file-list" class="file-chips"></ul>
+
+    <div class="options">
+      <label class="chk"><input type="checkbox" id="opt-self" checked>
+        <span>Báo cả SĐT trùng lặp <b>trong chính file mới</b></span></label>
+      <label class="chk"><input type="checkbox" id="opt-stt" checked>
+        <span>Đánh lại cột STT khi xuất file</span></label>
+      <label class="chk"><input type="checkbox" id="opt-total" checked>
+        <span>Cập nhật nhãn “Tổng số: … dòng” ở tiêu đề</span></label>
+      <label class="chk"><input type="checkbox" id="opt-normalize">
+        <span>Chuẩn hoá SĐT về dạng <b>0xxxxxxxxx</b> khi xuất</span></label>
+    </div>
+    <p class="muted" style="margin-top:10px">Bấm <b>Kiểm tra trùng</b> → kết quả hiện ngay bên dưới,
+      kèm nút <b>xuất file đã loại trùng</b> và nút <b>lưu file vào thư mục</b> (chỉ lưu khi bạn bấm).</p>
+
+    <div class="run-row">
+      <button class="btn primary" id="btn-check">Kiểm tra trùng</button>
+      <button class="btn ghost" id="btn-reset" style="display:none">↺ Kiểm tra đợt mới</button>
+      <span id="check-status" class="status"></span>
+    </div>
+  </div>
+
+  <div id="results"></div>
+</section>
+
+<!-- ============================== TAB THƯ MỤC ============================== -->
+<section id="tab-folders" class="tab-panel">
+  <div class="card">
+    <div class="card-head"><h2>Tạo thư mục mới</h2></div>
+    <div class="inline-form">
+      <input type="text" id="new-folder-name" placeholder="VD: Đơn hàng tháng 11, Data Lào Cai…" maxlength="120">
+      <button class="btn primary" id="btn-create-folder">Tạo thư mục</button>
+    </div>
+    <p class="muted">Tên thư mục đặt tuỳ ý, có dấu tiếng Việt cũng được.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Thư mục đã có</h2>
+      <div class="head-actions"><button class="btn-link" id="reload-folders-2">Tải lại</button></div>
+    </div>
+    <div id="folder-manager"><p class="muted">Đang tải…</p></div>
+  </div>
+</section>
+</main>
+
+<div id="toast" class="toast"></div>
+<div id="modal-mask" class="modal-mask">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-icon" id="modal-icon">?</div>
+    <h3 id="modal-title"></h3>
+    <p id="modal-text"></p>
+    <div id="modal-field"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="modal-cancel">Huỷ</button>
+      <button class="btn primary" id="modal-ok">Đồng ý</button>
+    </div>
+  </div>
+</div>
+<template id="tpl-result"></template>
+<script src="/static/app.js"></script>
+</body>
+</html>
